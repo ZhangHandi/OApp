@@ -15,6 +15,13 @@ def load_paths(file_path):
     files = os.listdir(file_path)
     return [f for f in files if is_an_image_file(os.path.join(file_path, f))]
 
+def load_paths_and_names(file_path):
+    files = os.listdir(file_path)
+    paths = [f for f in files if is_an_image_file(os.path.join(file_path, f))]
+    image_paths = [os.path.join(file_path, f) for f in paths]
+    names = known_faces_name(paths)
+    return image_paths, names
+
 def known_faces_name(paths):
     known_names = []
     for path in paths:
