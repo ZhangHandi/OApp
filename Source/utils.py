@@ -1,5 +1,6 @@
 import os
 import face_recognition
+import cv2
 
 def is_an_image_file(filename):
     IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg']
@@ -60,7 +61,24 @@ def compare_result(expect_result, result):
             count += 1
     return print("Result : %d error out of %d. Accuracy: %.2f" %(len(result) - count, len(result), count/len(result)))
 
+def color_detection(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
+    light_white = (0, 0, 200)
+    dark_white = (145, 60, 255)
+
+    mask = cv2.inRange(hsv, light_white, dark_white)
+    result = cv2.bitwise_and(image, image, mask=mask)
+    # threshold image
+    ret, threshed_img = cv2.threshold(cv2.cvtColor(result, cv2.COLOR_BGR2GRAY),
+                    127, 255, cv2.THRESH_BINARY)
+    contours, hier = cv2.findContours(threshed_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    px, py, pw, ph = 0, 0, 0, 0
+    if len(contours) != 0:
+        c = max(contours, key = cv2.contourArea) 
+        # get the bounding rect
+        px, py, pw, ph = cv2.boundingRect(c)
+    return px, py, pw, ph
 
 
 

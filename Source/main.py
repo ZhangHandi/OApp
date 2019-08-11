@@ -25,4 +25,4 @@ paths = utils.load_paths(filepath)
 image_paths = [os.path.join(filepath, f) for f in paths]
 
 for image_path in image_paths:
-    mouth_detection.mouth_location(image_path, predictor_path)
+    mouth_detection.mouth_location_image(image_path, predictor_path)
