@@ -93,7 +93,7 @@ def mouth_detection_video(image, detector, predictor):
     # faces.
     rect = detector(gray, 1)
     if not is_only_one_person(rect):
-        quit()
+        pass
     else:
         # determine the facial landmarks for the face region, then
         # convert the landmark (x, y)-coordinates to a NumPy array
