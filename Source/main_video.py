@@ -35,6 +35,7 @@ def thread_video(input):
     # Dedicated thread for grabbing video frames with VideoGet object.
     # Main thread shows video frames.
     video_getter = VideoGet(input).start() 
+
     nb_total = 0
     nb_fr = 0
     nb_pill = 0
@@ -47,7 +48,6 @@ def thread_video(input):
         frame = video_getter.frame
         rgb_frame = frame[:, :, ::-1]
     
-
         # find all the faces and make sure there can not be more than one person
         face_location = face_recognition.face_locations(rgb_frame)
         if len(face_location) == 0:
@@ -60,33 +60,35 @@ def thread_video(input):
             name = known_names[index]
             if name == args["name"]:
                 nb_fr += 1
-        
-        try:
-            (top, right, bottom, left) = face_location
-            face_height = bottom - top
-            (x, y, w, h) = mouth_detection.mouth_detection_video(frame, detector, predictor)
-            if h > 0.18*face_height:
-                roi = frame[y:y+h, x:x+w]
-                (px, py, pw, ph) = utils.color_detection(roi)
-                if pw != 0:
-                    nb_pill += 1
-        except:
-                    pass
-        fps.update()
-        nb_total += 1    
+            try:
+                top, right, bottom, left = face_location[0]
+                face_height = bottom - top
+                (x, y, w, h) = mouth_detection.mouth_detection_video(frame, detector, predictor)
+                if h > 0.2*face_height:
+                    d = int(0.35*h)
+                    roi = frame[y+d:y+h, x:x+w]
+                    (px, py, pw, ph) = utils.color_detection(roi)
+                    if pw != 0:
+                        nb_pill += 1
+            except:
+                        pass
+            fps.update()
+            nb_total += 1    
     return nb_total, nb_fr, nb_pill
 
 fps = FPS().start()
 nb_total, nb_fr, nb_pill = thread_video(args["video"])
 fps.stop()
-print(nb_total, nb_fr, nb_pill)
 
-if nb_pill/nb_total < 0.1:
+print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+
+if nb_pill/nb_total < 0.15:
     print("[INFO] no pill detected : {:.2f}".format(nb_pill/nb_total))
 else:
     print("[INFO] pill detected : {:.2f}".format(nb_pill/nb_total))
 
-if nb_fr/nb_total > 0.8:
+if nb_fr/nb_total > 0.6:
     print("[INFO] right person : {:.2f}".format(nb_fr/nb_total))
 else:
     print("[INFO] wrong person : {:.2f}".format(nb_fr/nb_total))

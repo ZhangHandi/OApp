@@ -47,7 +47,7 @@ def create_database(file_path):
     return known_names, face_images_encoding
 
 def recognize_face(unknown_face_encoding, known_faces_encoding) :
-    results = face_recognition.compare_faces(known_faces_encoding, unknown_face_encoding, tolerance=0.4)
+    results = face_recognition.compare_faces(known_faces_encoding, unknown_face_encoding, tolerance=0.45)
     try:
         index = results.index(True)
         return index
