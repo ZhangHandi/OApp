@@ -5,24 +5,36 @@ from imutils import face_utils
 import numpy as np
 
 def is_only_one_person(detect):
+    '''
+    This function will detect if there's is only one person in picture by verifying length of 
+    input list which contains all the face locations detected.
+    :param detect: A list of face locations detected
+    :return: A boolean True or False
+    WARNING : Due to the fact that face locations will sometimes detected by mistake(i.e only one person in image
+    but detected zero or two), so this function will not be used.
+    '''
     if len(detect) != 1 :
-        print('No person or not only one person in the image.')
+        print("no person or not only one person in image.")
         return False
     return True
 
 def visualize_mouth(image, shape, colors=None, alpha=0.75):
-	# create two copies of the input image -- one for the
-	# overlay and one for the final output image
+    '''
+    :param immage: input image
+    :parma shape: a NumPy array which contains (x, y)-coordinates of all the facial landmarks for the face region
+    :param colors: unique color for visualize facial landmark region, None by default 
+    :param alpha: weight of one copy of the input image(variable overlay), 0.75 by default
+    :return: output image with mouth shown
+    '''
+	# create two copies of the input image -- one for the overlay and one for the final output image
     overlay = image.copy()
     output = image.copy()
 
-	# if the colors list is None, initialize it with a unique
-	# color for each facial landmark region
+	# if the colors list is None, initialize it with a unique color for each facial landmark region
     if colors is None:
         colors = (19, 199, 109)
 
-	# grab the (x, y)-coordinates associated with the
-	# face landmark
+	# grab the (x, y)-coordinates associated with mouth
     (j, k) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
     pts = shape[j:k]
     hull = cv2.convexHull(pts)
@@ -30,11 +42,18 @@ def visualize_mouth(image, shape, colors=None, alpha=0.75):
     
 	# apply the transparent overlay
     cv2.addWeighted(overlay, alpha, output, 1 - alpha, 0, output)
+
     # return the output image
     return output
 
 
 def mouth_location_image(image_path, predictor_path):
+    '''
+    Detect mouth location in image then visualize it. This function was used for only image processing(main_image.py
+    in this project)
+    :param image_path: image path to load image
+    :param predictor_path: path to load the facial landmark predictor
+    '''
     # initialize dlib's face detector (HOG-based) and then create
     # the facial landmark predictor
     detector = dlib.get_frontal_face_detector()
@@ -82,8 +101,16 @@ def mouth_location_image(image_path, predictor_path):
         cv2.imshow("Image", output)
         cv2.waitKey(0)     
 
-# function for video : input image
 def mouth_detection_video(image, detector, predictor):
+    '''
+    Same function as mouth_detection image, except detect mouth location in video then no need to visualize it. 
+    This function was used for only video processing(main_video.py in this project)
+    :param image: video frame 
+    :param detector: dlib's face detector (HOG-based)
+    :param predictor: the facial landmark predictor
+    :return: x, y, w, h: (x, y)-coordinates of the left-top point of mouth bounding box
+    w: width of bounding box, h: height of bounding box
+    '''
     # load the input image and convert it to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -104,7 +131,5 @@ def mouth_detection_video(image, detector, predictor):
 
         # extract the ROI of the face region as a separate image
         (x, y, w, h) = cv2.boundingRect(np.array([shape[i:j]]))
-        
-        # visualize_mouth(image, shape)
         cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0))
         return x, y, w, h

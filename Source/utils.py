@@ -3,6 +3,11 @@ import face_recognition
 import cv2
 
 def is_an_image_file(filename):
+    '''
+    Verfiy if the input file is an image file.
+    :param filename: input filename
+    :return: A boolean True or False
+    '''
     IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg']
     statinfo = os.stat(filename).st_size
     if (statinfo == 0):
@@ -13,10 +18,20 @@ def is_an_image_file(filename):
     return False
 
 def load_paths(file_path):
+    '''
+    Verify each file in folder if it's an image file, and put all image files in list.
+    :param file_path: path to input image folder
+    :return: list contains all image path
+    '''
     files = os.listdir(file_path)
     return [f for f in files if is_an_image_file(os.path.join(file_path, f))]
 
 def load_paths_and_names(file_path):
+    '''
+    Load image paths and names of images
+    :param file_path: path to input folder
+    :return: image_paths: list of images paths, names: list of faces' names(name of image)
+    '''
     files = os.listdir(file_path)
     paths = [f for f in files if is_an_image_file(os.path.join(file_path, f))]
     image_paths = [os.path.join(file_path, f) for f in paths]
@@ -24,6 +39,11 @@ def load_paths_and_names(file_path):
     return image_paths, names
 
 def known_faces_name(paths):
+    '''
+    Load all faces' names
+    :param paths: image paths
+    :return: all names in database
+    '''
     known_names = []
     for path in paths:
         if path.endswith('.jpg') or path.endswith('.png'):
@@ -33,6 +53,12 @@ def known_faces_name(paths):
     return known_names
 
 def create_database(file_path):
+    '''
+    Create a datebase by loading images and transfer to face encodings
+    :param file_path: path to image folder
+    :return: known_names: list of names in database, face_images_encoding: list of face encodings
+    for each image file
+    '''
     paths = load_paths(file_path)
     known_names = known_faces_name(paths)
     image_paths = [os.path.join(file_path, f) for f in paths]
@@ -47,6 +73,12 @@ def create_database(file_path):
     return known_names, face_images_encoding
 
 def recognize_face(unknown_face_encoding, known_faces_encoding) :
+    '''
+    Recognize if it's the same face in database
+    :param unknown_face_encoding: face encoding to be verified 
+    :param known_faces_encoding: list of known face encoding
+    :return: the index of face corresponded
+    '''
     results = face_recognition.compare_faces(known_faces_encoding, unknown_face_encoding, tolerance=0.45)
     try:
         index = results.index(True)
@@ -55,6 +87,12 @@ def recognize_face(unknown_face_encoding, known_faces_encoding) :
         return len(known_faces_encoding)
 
 def compare_result(expect_result, result):
+    '''
+    Compare each result for each face to be verified in folder
+    :param expect_result: expect result for detected face
+    :param result: actual result of detected face
+    :return: result and accuracy
+    '''
     count = 0
     for i in range(len(result)):
         if result[i] in expect_result[i]:
@@ -62,6 +100,11 @@ def compare_result(expect_result, result):
     return print("Result : %d error out of %d. Accuracy: %.2f" %(len(result) - count, len(result), count/len(result)))
 
 def color_detection(image):
+    '''
+    Detect certain color in mouth
+    :param image: input image
+    :return: px, py, pw, ph: (x, y)-coordinate of top-left point, width and height of bounding box
+    '''
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     light_white = (0, 0, 200)

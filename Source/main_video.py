@@ -53,6 +53,7 @@ def thread_video(input):
         if len(face_location) == 0:
             pass
         elif len(face_location) > 1:
+            print("WARNING: two person appear!")
             pass
         else:
             unknown_face_encoding = face_recognition.face_encodings(rgb_frame, face_location)[0]
